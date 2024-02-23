@@ -2,8 +2,7 @@ FROM node:20-alpine3.19 AS development
 
 WORKDIR /var/www
 
-COPY package.json ./
-COPY package-lock.json ./
+COPY package*.json ./
 COPY tsconfig.build.json ./
 COPY tsconfig.json ./
 
