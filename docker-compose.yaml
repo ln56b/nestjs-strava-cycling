@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # NestJS API
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      # Only build development image if NODE_ENV is set to development
+      target: development
+    volumes:
+      - .:/www
+      - /var/www/node_modules
+    command: npm run start:dev
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+    ports:
+      - 3000:3000
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:16.2-alpine3.19
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - 5432:5432
+
+  postgres_admin:
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - 8080:80
