@@ -1,8 +1,8 @@
 export enum Endpoint {
-  AUTH = 'api/auth',
+  AUTH = 'auth',
   LOGIN = 'login',
   SIGNUP = 'signup',
   LOGOUT = 'logout',
-  ACTIVITIES = 'api/activities',
-  USER = 'api/user',
+  ACTIVITIES = 'activities',
+  USER = 'user',
 }
