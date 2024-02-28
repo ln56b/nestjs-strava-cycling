@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './createUserDto';
 import { User } from '../user.interfaces';
 import { LoginDto } from './loginDto';
 
 @Injectable()
 export class DtoHelperService {
-  createUserDtoToEntity(dto: CreateUserDto): User {
+  // TODO remove
+  createUserDtoToEntity(dto: any): User {
     return {
       email: dto.email,
       password: dto.password,
