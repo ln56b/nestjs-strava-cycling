@@ -4,5 +4,5 @@ export enum Endpoint {
   SIGNUP = 'signup',
   LOGOUT = 'logout',
   ACTIVITIES = 'activities',
-  USER = 'user',
+  USERS = 'users',
 }
