@@ -2,41 +2,32 @@ import {
   BadRequestException,
   Body,
   Controller,
-  Get,
   Post,
-  Request,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from '../services/auth.service';
-import { Endpoint } from 'src/shared/endpoint.enum';
-import {
-  LoginResponseDto,
-  SignupRequestDto,
-  SignupResponseDto,
-} from '../dtos/auth.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { Endpoint } from 'src/shared/endpoint.enum';
+import { User } from 'src/user/interfaces/user.interfaces';
 import { Public } from '../decorators/public.decorator';
+import { GetUser } from '../decorators/user.decorator';
+import { AuthResponseDto, SignupRequestDto } from '../dtos/auth.dto';
+import { AuthService } from '../services/auth.service';
 
 @Public()
 @Controller(Endpoint.AUTH)
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Get() // TODO remove
-  getHello(): string {
-    return 'Hello World!';
-  }
-
   @UseGuards(AuthGuard('local'))
   @Post(Endpoint.LOGIN)
-  async login(@Request() req): Promise<LoginResponseDto | BadRequestException> {
-    return this.authService.login(req.user);
+  login(@GetUser() user: User): Promise<AuthResponseDto | BadRequestException> {
+    return this.authService.login(user);
   }
 
   @Post(Endpoint.SIGNUP)
-  async signup(
+  signup(
     @Body() signupBody: SignupRequestDto,
-  ): Promise<SignupResponseDto | BadRequestException> {
-    return await this.authService.signup(signupBody);
+  ): Promise<AuthResponseDto | BadRequestException> {
+    return this.authService.signup(signupBody);
   }
 }

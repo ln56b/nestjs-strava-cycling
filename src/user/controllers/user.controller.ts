@@ -1,23 +1,26 @@
-import { Body, Controller, Get, Put, Request } from '@nestjs/common';
+import { Body, Controller, Get, Put } from '@nestjs/common';
+import { GetUser } from 'src/auth/decorators/user.decorator';
 import { Endpoint } from 'src/shared/endpoint.enum';
 import { UserService } from '../services/user.service';
-import { User } from '../user.interfaces';
+import { StravaLoginResponse, User } from '../interfaces/user.interfaces';
 
 @Controller(Endpoint.USERS)
 export class UserController {
   constructor(private userService: UserService) {}
 
   @Get()
-  getUser(@Request() req): Promise<User> {
-    return this.userService.findOneById(req.user?.id);
+  getUser(@GetUser() user: User): Promise<User> {
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return this.userService.findOneById(user.id);
   }
 
   @Put('strava-token')
-  async loginToStrava(
-    @Request() req,
+  loginToStrava(
+    @GetUser() user: User,
     @Body() body: { code: string },
-  ): Promise<any> {
-    // TODO - define return type
-    return this.userService.loginToStrava(req.user, body.code);
+  ): Promise<StravaLoginResponse> {
+    return this.userService.loginToStrava(user, body.code);
   }
 }

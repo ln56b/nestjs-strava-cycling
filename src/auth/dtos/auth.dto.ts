@@ -1,6 +1,6 @@
 import { AccessToken } from '../interfaces/auth';
 
-export type LoginResponseDto = AccessToken;
+export type AuthResponseDto = AccessToken;
 
 export type SignupRequestDto = {
   email: string;
@@ -8,5 +8,3 @@ export type SignupRequestDto = {
   strava_id: number;
   strava_secret: string;
 };
-
-export type SignupResponseDto = AccessToken;
