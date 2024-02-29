@@ -5,6 +5,7 @@ import { User } from '../entities/user.entity';
 import { UUID } from 'crypto';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { StravaLoginResponse } from '../interfaces/user.interfaces';
 
 @Injectable()
 export class UserService {
@@ -13,8 +14,7 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  // TODO - define return type
-  async loginToStrava(user: User, token: string): Promise<any> {
+  async loginToStrava(user: User, token: string): Promise<StravaLoginResponse> {
     const foundUser = await this.userRepository.findOneBy({ id: user.id });
 
     if (!foundUser) {
@@ -30,6 +30,7 @@ export class UserService {
         `https://www.strava.com/oauth/token?client_id=${updatedUser.strava_id}&code=${updatedUser.strava_token}&client_secret=${updatedUser.strava_secret}&grant_type=authorization_code`,
       ),
     );
+
     return stravaLoginResponse.data;
   }
 

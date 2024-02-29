@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/user/user.interfaces';
+import { User } from 'src/user/interfaces/user.interfaces';
 
 import * as bcrypt from 'bcrypt';
-import { AccessToken } from '../interfaces/auth';
 import { UserService } from 'src/user/services/user.service';
+import { AccessToken } from '../interfaces/auth';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +16,7 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.userService.findOneByEmail(email);
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new BadRequestException('Invalid credentials');
     }
 
     const isPasswordValid = await this._comparePassword(
@@ -24,7 +24,7 @@ export class AuthService {
       user.password,
     );
     if (!isPasswordValid) {
-      throw new BadRequestException('Invalid password');
+      throw new BadRequestException('Invalid credentials');
     }
     return user;
   }
@@ -54,10 +54,5 @@ export class AuthService {
     storedHash: string,
   ): Promise<boolean> {
     return bcrypt.compare(password, storedHash);
-  }
-
-  verifyJwt(token: string): Promise<any> {
-    // TODO remove
-    return this.jwtService.verifyAsync(token);
   }
 }
