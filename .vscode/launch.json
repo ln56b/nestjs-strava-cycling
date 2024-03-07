@@ -1,0 +1,15 @@
+{
+  "configurations": [
+    {
+      "name": "Debug: nestjs-strava-cycling",
+      "type": "node",
+      "request": "attach",
+      "remoteRoot": "/var/www",
+      "localRoot": "${workspaceFolder}",
+      "port": 9229,
+      "restart": true,
+      "address": "0.0.0.0",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}
