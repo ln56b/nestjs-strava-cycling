@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Post } from '@nestjs/common';
 import { GetUser } from 'src/auth/decorators/user.decorator';
 import { Endpoint } from 'src/shared/endpoint.enum';
 import {
@@ -14,9 +14,6 @@ export class UserController {
 
   @Get()
   getUser(@GetUser() user: User): Promise<User> {
-    if (!user) {
-      throw new Error('User not found');
-    }
     return this.userService.findOneById(user.id);
   }
 
