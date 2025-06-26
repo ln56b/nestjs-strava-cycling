@@ -6,7 +6,7 @@ export interface User {
   password: string;
   strava_id: number;
   strava_secret: string;
-  strava_token?: string;
+  strava_code?: string;
 }
 
 export interface StravaLoginResponse {
