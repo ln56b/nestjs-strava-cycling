@@ -48,4 +48,23 @@ export class UserService {
   create(user: User): Promise<User> {
     return this.userRepository.save(user);
   }
+
+  async refreshStravaToken(
+    user: User,
+    refreshToken: string,
+  ): Promise<StravaRefreshTokenResponse> {
+    const foundUser = await this.userRepository.findOneBy({ id: user.id });
+
+    if (!foundUser) {
+      throw new Error('User not found');
+    }
+
+    const stravaRefreshTokenResponse = await firstValueFrom(
+      this.httpService.post(
+        `https://www.strava.com/oauth/token?client_id=${foundUser.strava_id}&client_secret=${foundUser.strava_secret}&grant_type=refresh_token&refresh_token=${refreshToken}`,
+      ),
+    );
+
+    return stravaRefreshTokenResponse.data;
+  }
 }
