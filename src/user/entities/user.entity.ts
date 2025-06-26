@@ -19,5 +19,5 @@ export class User {
   strava_secret: string;
 
   @Column({ nullable: true })
-  strava_token?: string;
+  strava_code?: string;
 }

@@ -6,15 +6,11 @@ export interface User {
   password: string;
   strava_id: number;
   strava_secret: string;
-  strava_token?: string;
+  strava_code?: string;
 }
 
-export interface StravaLoginResponse {
+export interface StravaLoginResponse extends StravaRefreshTokenResponse {
   token_type: string;
-  expires_at: number;
-  expires_in: number;
-  refresh_token: string;
-  access_token: string;
   athlete: {
     id: number;
     username: string;
@@ -37,4 +33,11 @@ export interface StravaLoginResponse {
     friend: string;
     follower: string;
   };
+}
+
+export interface StravaRefreshTokenResponse {
+  expires_at: number;
+  expires_in: number;
+  refresh_token: string;
+  access_token: string;
 }

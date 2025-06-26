@@ -5,7 +5,10 @@ import { User } from '../entities/user.entity';
 import { UUID } from 'crypto';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { StravaLoginResponse } from '../interfaces/user.interfaces';
+import {
+  StravaLoginResponse,
+  StravaRefreshTokenResponse,
+} from '../interfaces/user.interfaces';
 
 @Injectable()
 export class UserService {
@@ -14,7 +17,7 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  async loginToStrava(user: User, token: string): Promise<StravaLoginResponse> {
+  async loginToStrava(user: User, code: string): Promise<StravaLoginResponse> {
     const foundUser = await this.userRepository.findOneBy({ id: user.id });
 
     if (!foundUser) {
@@ -22,12 +25,12 @@ export class UserService {
     }
     const updatedUser = await this.userRepository.save({
       ...foundUser,
-      strava_token: token,
+      strava_code: code,
     });
 
     const stravaLoginResponse = await firstValueFrom(
       this.httpService.post(
-        `https://www.strava.com/oauth/token?client_id=${updatedUser.strava_id}&code=${updatedUser.strava_token}&client_secret=${updatedUser.strava_secret}&grant_type=authorization_code`,
+        `https://www.strava.com/oauth/token?client_id=${updatedUser.strava_id}&code=${updatedUser.strava_code}&client_secret=${updatedUser.strava_secret}&grant_type=authorization_code`,
       ),
     );
 
@@ -44,5 +47,24 @@ export class UserService {
 
   create(user: User): Promise<User> {
     return this.userRepository.save(user);
+  }
+
+  async refreshStravaToken(
+    user: User,
+    refreshToken: string,
+  ): Promise<StravaRefreshTokenResponse> {
+    const foundUser = await this.userRepository.findOneBy({ id: user.id });
+
+    if (!foundUser) {
+      throw new Error('User not found');
+    }
+
+    const stravaRefreshTokenResponse = await firstValueFrom(
+      this.httpService.post(
+        `https://www.strava.com/oauth/token?client_id=${foundUser.strava_id}&client_secret=${foundUser.strava_secret}&grant_type=refresh_token&refresh_token=${refreshToken}`,
+      ),
+    );
+
+    return stravaRefreshTokenResponse.data;
   }
 }
