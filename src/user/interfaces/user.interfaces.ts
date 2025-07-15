@@ -4,8 +4,6 @@ export interface User {
   id?: UUID;
   email: string;
   password: string;
-  strava_id: number;
-  strava_secret: string;
   strava_code?: string;
 }
 

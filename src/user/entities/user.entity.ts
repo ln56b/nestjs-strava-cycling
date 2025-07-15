@@ -12,12 +12,6 @@ export class User {
   @Column() // TODO see if select : false is needed
   password: string;
 
-  @Column()
-  strava_id: number;
-
-  @Column()
-  strava_secret: string;
-
   @Column({ nullable: true })
   strava_code?: string;
 }

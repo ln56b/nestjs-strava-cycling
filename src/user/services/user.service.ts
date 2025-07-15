@@ -14,12 +14,14 @@ import {
   StravaLoginResponse,
   StravaRefreshTokenResponse,
 } from '../interfaces/user.interfaces';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly httpService: HttpService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private configService: ConfigService,
   ) {}
 
   async loginToStrava(user: User, code: string): Promise<StravaLoginResponse> {
@@ -33,7 +35,13 @@ export class UserService {
     try {
       const stravaLoginResponse = await firstValueFrom(
         this.httpService.post(
-          `https://www.strava.com/oauth/token?client_id=${updatedUser.strava_id}&code=${updatedUser.strava_code}&client_secret=${updatedUser.strava_secret}&grant_type=authorization_code`,
+          `https://www.strava.com/oauth/token?client_id=${this.configService.get(
+            'STRAVA_CLIENT_ID',
+          )}&code=${
+            updatedUser.strava_code
+          }&client_secret=${this.configService.get(
+            'STRAVA_CLIENT_SECRET',
+          )}&grant_type=authorization_code`,
         ),
       );
       return stravaLoginResponse.data;
@@ -77,12 +85,14 @@ export class UserService {
     user: User,
     refreshToken: string,
   ): Promise<StravaRefreshTokenResponse> {
-    const foundUser = await this.findOneById(user.id);
-
     try {
       const stravaRefreshTokenResponse = await firstValueFrom(
         this.httpService.post(
-          `https://www.strava.com/oauth/token?client_id=${foundUser.strava_id}&client_secret=${foundUser.strava_secret}&grant_type=refresh_token&refresh_token=${refreshToken}`,
+          `https://www.strava.com/oauth/token?client_id=${this.configService.get(
+            'STRAVA_CLIENT_ID',
+          )}&client_secret=${this.configService.get(
+            'STRAVA_CLIENT_SECRET',
+          )}&grant_type=refresh_token&refresh_token=${refreshToken}`,
         ),
       );
       return stravaRefreshTokenResponse.data;
