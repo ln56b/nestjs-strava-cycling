@@ -5,6 +5,8 @@ export interface User {
   email: string;
   password: string;
   strava_code?: string;
+  last_login?: Date;
+  theme: string;
 }
 
 export interface StravaLoginResponse extends StravaRefreshTokenResponse {

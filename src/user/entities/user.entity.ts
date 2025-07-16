@@ -14,4 +14,10 @@ export class User {
 
   @Column({ nullable: true })
   strava_code?: string;
+
+  @Column({ nullable: true })
+  last_login?: Date;
+
+  @Column({ default: 'dark' })
+  theme: string;
 }
