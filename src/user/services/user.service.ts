@@ -15,6 +15,7 @@ import {
   StravaRefreshTokenResponse,
 } from '../interfaces/user.interfaces';
 import { ConfigService } from '@nestjs/config';
+import { SignupRequest } from 'src/auth/interfaces/auth';
 
 @Injectable()
 export class UserService {
@@ -24,8 +25,11 @@ export class UserService {
     private configService: ConfigService,
   ) {}
 
-  async loginToStrava(user: User, code: string): Promise<StravaLoginResponse> {
-    const foundUser = await this.userRepository.findOneBy({ id: user.id });
+  async loginToStrava(
+    userId: UUID,
+    code: string,
+  ): Promise<StravaLoginResponse> {
+    const foundUser = await this.findOneById(userId);
 
     const updatedUser = await this._save({
       ...foundUser,
@@ -69,7 +73,7 @@ export class UserService {
     return foundUser;
   }
 
-  async create(user: User): Promise<User> {
+  async create(user: SignupRequest): Promise<User> {
     try {
       const createdUser = await this.userRepository.save(user);
       return createdUser;
@@ -82,7 +86,6 @@ export class UserService {
   }
 
   async refreshStravaToken(
-    user: User,
     refreshToken: string,
   ): Promise<StravaRefreshTokenResponse> {
     try {
@@ -111,6 +114,38 @@ export class UserService {
     } catch (error) {
       throw new HttpException(
         'An error occured while saving user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateTheme(userId: UUID, theme: string): Promise<HttpStatus> {
+    const foundUser = await this.findOneById(userId);
+    try {
+      await this._save({
+        ...foundUser,
+        theme,
+      });
+      return HttpStatus.OK;
+    } catch (error) {
+      throw new HttpException(
+        'An error occured while updating theme',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateLastLogin(userId: UUID): Promise<HttpStatus> {
+    const foundUser = await this.findOneById(userId);
+    try {
+      await this._save({
+        ...foundUser,
+        last_login: new Date(),
+      });
+      return HttpStatus.OK;
+    } catch (error) {
+      throw new HttpException(
+        'An error occured while updating last login',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

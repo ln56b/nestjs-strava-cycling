@@ -4,7 +4,7 @@ import { User } from 'src/user/interfaces/user.interfaces';
 
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/user/services/user.service';
-import { AccessToken } from '../interfaces/auth';
+import { AccessToken, LoginResponse, SignupRequest } from '../interfaces/auth';
 
 @Injectable()
 export class AuthService {
@@ -29,19 +29,25 @@ export class AuthService {
     return user;
   }
 
-  async login(user: User): Promise<AccessToken> {
+  async login(user: User): Promise<LoginResponse> {
     const payload = { email: user.email, id: user.id };
-    return { access_token: this.jwtService.sign(payload) };
+    return {
+      access_token: this.jwtService.sign(payload),
+      theme: user.theme,
+    };
   }
 
-  async signup(user: User): Promise<AccessToken> {
+  async signup(user: SignupRequest): Promise<AccessToken> {
     const existingUser = await this.userService.findOneByEmail(user.email);
     if (existingUser) {
       throw new BadRequestException('User already exists');
     }
     const hashedPassword = await this._hashPassword(user.password);
-    const newUser = { ...user, password: hashedPassword };
-    await this.userService.create(newUser);
+
+    const newUser = await this.userService.create({
+      email: user.email,
+      password: hashedPassword,
+    });
     return this.login(newUser);
   }
 
