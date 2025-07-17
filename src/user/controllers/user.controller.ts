@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Post, Put } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Put } from '@nestjs/common';
 import { GetUser } from 'src/auth/decorators/user.decorator';
 import { Endpoint } from 'src/shared/endpoint.enum';
 import {
@@ -11,11 +11,6 @@ import { UserService } from '../services/user.service';
 @Controller(Endpoint.USERS)
 export class UserController {
   constructor(private userService: UserService) {}
-
-  @Get()
-  getUser(@GetUser() user: User): Promise<User> {
-    return this.userService.findOneById(user.id);
-  }
 
   @Post('strava-token')
   loginToStrava(

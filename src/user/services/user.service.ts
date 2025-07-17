@@ -29,7 +29,7 @@ export class UserService {
     userId: UUID,
     code: string,
   ): Promise<StravaLoginResponse> {
-    const foundUser = await this.findOneById(userId);
+    const foundUser = await this._findOneById(userId);
 
     const updatedUser = await this._save({
       ...foundUser,
@@ -61,14 +61,6 @@ export class UserService {
     const foundUser = this.userRepository.findOneBy({ email });
     if (!foundUser) {
       throw new NotFoundException(`User with email ${email} not found`);
-    }
-    return foundUser;
-  }
-
-  async findOneById(id: UUID): Promise<User> {
-    const foundUser = await this.userRepository.findOneBy({ id });
-    if (!foundUser) {
-      throw new NotFoundException(`User with id ${id} not found`);
     }
     return foundUser;
   }
@@ -120,7 +112,7 @@ export class UserService {
   }
 
   async updateTheme(userId: UUID, theme: string): Promise<HttpStatus> {
-    const foundUser = await this.findOneById(userId);
+    const foundUser = await this._findOneById(userId);
     try {
       await this._save({
         ...foundUser,
@@ -136,7 +128,7 @@ export class UserService {
   }
 
   async updateLastLogin(userId: UUID): Promise<HttpStatus> {
-    const foundUser = await this.findOneById(userId);
+    const foundUser = await this._findOneById(userId);
     try {
       await this._save({
         ...foundUser,
@@ -149,5 +141,13 @@ export class UserService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  private async _findOneById(id: UUID): Promise<User> {
+    const foundUser = await this.userRepository.findOneBy({ id });
+    if (!foundUser) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+    return foundUser;
   }
 }
