@@ -11,21 +11,27 @@ import { UUID } from 'crypto';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import {
+  IUser,
   StravaLoginResponse,
   StravaRefreshTokenResponse,
 } from '../interfaces/user.interfaces';
 import { ConfigService } from '@nestjs/config';
+import { SignupRequest } from 'src/auth/interfaces/auth';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly httpService: HttpService,
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private configService: ConfigService,
   ) {}
 
-  async loginToStrava(user: User, code: string): Promise<StravaLoginResponse> {
-    const foundUser = await this.userRepository.findOneBy({ id: user.id });
+  async loginToStrava(
+    userId: UUID,
+    code: string,
+  ): Promise<StravaLoginResponse> {
+    const foundUser = await this.findOneById(userId);
 
     const updatedUser = await this._save({
       ...foundUser,
@@ -44,6 +50,10 @@ export class UserService {
           )}&grant_type=authorization_code`,
         ),
       );
+      await this.updateStravaAccessToken(
+        userId,
+        stravaLoginResponse.data.access_token,
+      );
       return stravaLoginResponse.data;
     } catch (error) {
       throw new HttpException(
@@ -53,7 +63,7 @@ export class UserService {
     }
   }
 
-  findOneByEmail(email: string): Promise<User> {
+  findOneByEmail(email: string): Promise<IUser> {
     const foundUser = this.userRepository.findOneBy({ email });
     if (!foundUser) {
       throw new NotFoundException(`User with email ${email} not found`);
@@ -61,15 +71,7 @@ export class UserService {
     return foundUser;
   }
 
-  async findOneById(id: UUID): Promise<User> {
-    const foundUser = await this.userRepository.findOneBy({ id });
-    if (!foundUser) {
-      throw new NotFoundException(`User with id ${id} not found`);
-    }
-    return foundUser;
-  }
-
-  async create(user: User): Promise<User> {
+  async create(user: SignupRequest): Promise<IUser> {
     try {
       const createdUser = await this.userRepository.save(user);
       return createdUser;
@@ -82,7 +84,6 @@ export class UserService {
   }
 
   async refreshStravaToken(
-    user: User,
     refreshToken: string,
   ): Promise<StravaRefreshTokenResponse> {
     try {
@@ -104,7 +105,7 @@ export class UserService {
     }
   }
 
-  private async _save(user: User): Promise<User> {
+  private async _save(user: IUser): Promise<IUser> {
     try {
       const savedUser = await this.userRepository.save(user);
       return savedUser;
@@ -114,5 +115,61 @@ export class UserService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  async updateTheme(userId: UUID, theme: string): Promise<HttpStatus> {
+    const foundUser = await this.findOneById(userId);
+    try {
+      await this._save({
+        ...foundUser,
+        theme,
+      });
+      return HttpStatus.OK;
+    } catch (error) {
+      throw new HttpException(
+        'An error occured while updating theme',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateStravaAccessToken(
+    userId: UUID,
+    accessToken: string,
+  ): Promise<HttpStatus> {
+    const foundUser = await this.findOneById(userId);
+    try {
+      await this._save({ ...foundUser, strava_access_token: accessToken });
+      return HttpStatus.OK;
+    } catch (error) {
+      throw new HttpException(
+        'An error occured while updating access token',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateLastLogin(userId: UUID): Promise<HttpStatus> {
+    const foundUser = await this.findOneById(userId);
+    try {
+      await this._save({
+        ...foundUser,
+        last_login: new Date(),
+      });
+      return HttpStatus.OK;
+    } catch (error) {
+      throw new HttpException(
+        'An error occured while updating last login',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async findOneById(uuid: UUID): Promise<IUser> {
+    const foundUser = await this.userRepository.findOneBy({ uuid });
+    if (!foundUser) {
+      throw new NotFoundException(`User with id ${uuid} not found`);
+    }
+    return foundUser;
   }
 }
