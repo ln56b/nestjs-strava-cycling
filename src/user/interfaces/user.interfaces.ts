@@ -1,7 +1,7 @@
 import { UUID } from 'crypto';
 
 export interface User {
-  id?: UUID;
+  uuid?: UUID;
   email: string;
   password: string;
   strava_code?: string;

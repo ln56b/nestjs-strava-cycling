@@ -17,7 +17,7 @@ export class UserController {
     @GetUser() user: User,
     @Body() body: { code: string },
   ): Promise<StravaLoginResponse> {
-    return this.userService.loginToStrava(user.id, body.code);
+    return this.userService.loginToStrava(user.uuid, body.code);
   }
 
   @Post('strava-refresh-token')
@@ -32,11 +32,11 @@ export class UserController {
     @GetUser() user: User,
     @Body() body: { theme: string },
   ): Promise<HttpStatus> {
-    return this.userService.updateTheme(user.id, body.theme);
+    return this.userService.updateTheme(user.uuid, body.theme);
   }
 
   @Put('last-login')
   updateLastLogin(@GetUser() user: User): Promise<HttpStatus> {
-    return this.userService.updateLastLogin(user.id);
+    return this.userService.updateLastLogin(user.uuid);
   }
 }
