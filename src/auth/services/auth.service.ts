@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/user/interfaces/user.interfaces';
+import { IUser } from 'src/user/interfaces/user.interfaces';
 
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/user/services/user.service';
@@ -13,7 +13,7 @@ export class AuthService {
     private userService: UserService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<User | null> {
+  async validateUser(email: string, password: string): Promise<IUser | null> {
     const user = await this.userService.findOneByEmail(email);
     if (!user) {
       throw new BadRequestException('Invalid credentials');
@@ -29,8 +29,9 @@ export class AuthService {
     return user;
   }
 
-  async login(user: User): Promise<LoginResponse> {
+  async login(user: IUser): Promise<LoginResponse> {
     const payload = { email: user.email, uuid: user.uuid };
+
     return {
       access_token: this.jwtService.sign(payload),
       theme: user.theme,

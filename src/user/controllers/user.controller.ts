@@ -4,17 +4,17 @@ import { Endpoint } from 'src/shared/endpoint.enum';
 import {
   StravaLoginResponse,
   StravaRefreshTokenResponse,
-  User,
+  IUser,
 } from '../interfaces/user.interfaces';
 import { UserService } from '../services/user.service';
 
 @Controller(Endpoint.USERS)
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
   @Post('strava-token')
   loginToStrava(
-    @GetUser() user: User,
+    @GetUser() user: IUser,
     @Body() body: { code: string },
   ): Promise<StravaLoginResponse> {
     return this.userService.loginToStrava(user.uuid, body.code);
@@ -29,14 +29,14 @@ export class UserController {
 
   @Put('theme')
   updateTheme(
-    @GetUser() user: User,
+    @GetUser() user: IUser,
     @Body() body: { theme: string },
   ): Promise<HttpStatus> {
     return this.userService.updateTheme(user.uuid, body.theme);
   }
 
   @Put('last-login')
-  updateLastLogin(@GetUser() user: User): Promise<HttpStatus> {
+  updateLastLogin(@GetUser() user: IUser): Promise<HttpStatus> {
     return this.userService.updateLastLogin(user.uuid);
   }
 }

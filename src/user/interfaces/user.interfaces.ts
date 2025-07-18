@@ -1,12 +1,14 @@
 import { UUID } from 'crypto';
 
-export interface User {
+export interface IUser {
   uuid?: UUID;
   email: string;
   password: string;
+  theme: string;
+  athleteId?: number;
   strava_code?: string;
   last_login?: Date;
-  theme: string;
+  strava_access_token?: string;
 }
 
 export interface StravaLoginResponse extends StravaRefreshTokenResponse {
