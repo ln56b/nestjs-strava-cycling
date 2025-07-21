@@ -1,15 +1,11 @@
 services:
   api:
+    env_file:
+      - path: .env.production
     build:
       context: .
       dockerfile: Dockerfile
-      target: development
-    volumes:
-      - .:/app
-      - node_modules:/app/node_modules
-    command: npm run start:debug
-    depends_on:
-      - postgres
+      target: production
     environment:
       POSTGRES_HOST: ${DATABASE_HOST}
       POSTGRES_PORT: ${DATABASE_PORT}
@@ -17,12 +13,16 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
       JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: production
     ports:
       - 3000:3000
-      - 9229:9229 # debug port
+    depends_on:
+      - postgres
 
   postgres:
-    image: postgres:17.5-alpine
+    env_file:
+      - path: .env.production
+    image: postgres:17.5-alpine3.22
     environment:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
@@ -32,16 +32,5 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  postgres_admin:
-    image: dpage/pgadmin4
-    depends_on:
-      - postgres
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    ports:
-      - 8080:80
-
 volumes:
   postgres_data:
-  node_modules:

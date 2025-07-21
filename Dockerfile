@@ -1,6 +1,6 @@
+# Development stage
 FROM node:20-alpine3.19 AS development
-
-WORKDIR /var/www
+WORKDIR /app
 
 COPY package*.json ./
 COPY tsconfig.build.json ./
@@ -12,14 +12,27 @@ RUN npm run build
 
 
 
-FROM node:20-alpine3.19 AS production
+# Build stage (for production)
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
 
+
+# Production stage
+FROM node:20-alpine3.19 AS production
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
-WORKDIR /var/www
+WORKDIR /app
 
-COPY --from=development /var/www .
+COPY --from=development /app/package*.json ./
+COPY --from=development /app/node_modules ./node_modules
+COPY --from=development /app/dist ./dist
 
 
 CMD ["node", "dist/main"]
+
+
