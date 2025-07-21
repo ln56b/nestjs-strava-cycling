@@ -34,17 +34,35 @@ export class ActivityService {
   }
 
   async saveActivities(activities: IStravaActivity[]): Promise<Activity[]> {
-    try {
-      const activityEntities = activities.map(this.mapStravaActivityToEntity);
-
-      const savedActivities = await this.activityRepository.save(
-        activityEntities,
-      );
-
-      return savedActivities;
-    } catch (error: any) {
-      throw new InternalServerErrorException(error.message);
+    const batchSize = 10;
+    const batches = [];
+    for (let i = 0; i < activities.length; i += batchSize) {
+      batches.push(activities.slice(i, i + batchSize));
     }
+
+    const savedActivities: Activity[] = [];
+
+    for (const batch of batches) {
+      try {
+        const activityEntities = batch.map(this.mapStravaActivityToEntity);
+        await this.activityRepository
+          .createQueryBuilder()
+          .insert()
+          .orIgnore()
+          .values(activityEntities)
+          .execute();
+
+        const insertedActivities = await this.activityRepository.find({
+          where: activityEntities.map((entity) => ({ id: entity.id })),
+        });
+
+        savedActivities.push(...insertedActivities);
+      } catch (error: any) {
+        throw new InternalServerErrorException(error.message);
+      }
+    }
+
+    return savedActivities;
   }
 
   fetchStravaActivities = async (user: IUser): Promise<IStravaActivity[]> => {
@@ -92,7 +110,6 @@ export class ActivityService {
       }
     }
 
-    console.log('allActivities', allActivities.length);
     return allActivities;
   };
 

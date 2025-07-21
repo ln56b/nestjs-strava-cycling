@@ -34,9 +34,4 @@ export class UserController {
   ): Promise<HttpStatus> {
     return this.userService.updateTheme(user.uuid, body.theme);
   }
-
-  @Put('last-login')
-  updateLastLogin(@GetUser() user: IUser): Promise<HttpStatus> {
-    return this.userService.updateLastLogin(user.uuid);
-  }
 }

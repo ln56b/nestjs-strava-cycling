@@ -17,6 +17,10 @@ export class ActivityController {
   async getActivities(@GetUser() user: IUser): Promise<Activity[]> {
     const userInDB = await this.userService.findOneById(user.uuid);
 
-    return this.activityService.getActivities(userInDB);
+    const activities = await this.activityService.getActivities(userInDB);
+
+    this.userService.updateLastLogin(user.uuid);
+
+    return activities;
   }
 }
