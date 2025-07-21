@@ -70,17 +70,17 @@ export class ActivityService {
     const per_page = 200;
     const allActivities: IStravaActivity[] = [];
 
-    const params = new URLSearchParams({
-      per_page: per_page.toString(),
-      page: page.toString(),
-    });
-    if (user.last_login) {
-      const epochTime = Math.floor(user.last_login.getTime() / 1000);
-      params.set('after', epochTime.toString());
-    }
-
     try {
       while (true) {
+        const params = new URLSearchParams({
+          per_page: per_page.toString(),
+          page: page.toString(),
+        });
+        if (user.last_login) {
+          const epochTime = Math.floor(user.last_login.getTime() / 1000);
+          params.set('after', epochTime.toString());
+        }
+
         const response = await this.httpService.get(
           `https://www.strava.com/api/v3/athlete/activities?${params.toString()}`,
           {
