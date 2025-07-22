@@ -1,5 +1,3 @@
-import { UUID } from 'crypto';
-
 export type AccessToken = {
   access_token: string;
 };
@@ -9,7 +7,7 @@ export interface LoginResponse extends AccessToken {
 }
 
 export type AccessTokenPayload = {
-  userId: UUID;
+  userId: string;
   email: string;
 };
 

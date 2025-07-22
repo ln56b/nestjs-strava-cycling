@@ -1,11 +1,10 @@
-import { UUID } from 'crypto';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { IActivity } from '../interfaces/activity.interfaces';
 
 @Entity()
 export class Activity implements IActivity {
   @PrimaryGeneratedColumn('uuid')
-  uuid?: UUID;
+  uuid?: string;
 
   @Column({ type: 'bigint' })
   id: string;
@@ -37,11 +36,11 @@ export class Activity implements IActivity {
   @Column()
   elapsed_time: number;
 
-  @Column({ type: 'float' })
-  elev_high: number;
+  @Column({ type: 'float', nullable: true })
+  elev_high: number | null;
 
-  @Column({ type: 'float' })
-  elev_low: number;
+  @Column({ type: 'float', nullable: true })
+  elev_low: number | null;
 
   @Column()
   external_id: string;

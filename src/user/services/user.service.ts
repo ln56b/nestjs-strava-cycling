@@ -7,7 +7,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
-import { UUID } from 'crypto';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -28,7 +27,7 @@ export class UserService {
   ) {}
 
   async loginToStrava(
-    userId: UUID,
+    userId: string,
     code: string,
   ): Promise<StravaLoginResponse> {
     const foundUser = await this.findOneById(userId);
@@ -105,7 +104,7 @@ export class UserService {
     }
   }
 
-  async updateTheme(userId: UUID, theme: string): Promise<HttpStatus> {
+  async updateTheme(userId: string, theme: string): Promise<HttpStatus> {
     const foundUser = await this.findOneById(userId);
     try {
       await this._save({
@@ -122,7 +121,7 @@ export class UserService {
   }
 
   async updateStravaAccessToken(
-    userId: UUID,
+    userId: string,
     accessToken: string,
   ): Promise<HttpStatus> {
     const foundUser = await this.findOneById(userId);
@@ -146,7 +145,7 @@ export class UserService {
     };
   }
 
-  async updateLastLogin(userId: UUID): Promise<HttpStatus> {
+  async updateLastLogin(userId: string): Promise<HttpStatus> {
     const foundUser = await this.findOneById(userId);
     try {
       await this._save({
@@ -162,7 +161,7 @@ export class UserService {
     }
   }
 
-  async findOneById(uuid: UUID): Promise<IUser> {
+  async findOneById(uuid: string): Promise<IUser> {
     const foundUser = await this.userRepository.findOneBy({ uuid });
     if (!foundUser) {
       throw new NotFoundException(`User with id ${uuid} not found`);
