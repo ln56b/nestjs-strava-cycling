@@ -1,36 +1,36 @@
-# Development stage
-FROM node:20-alpine3.19 AS development
+FROM node:22-alpine AS base
+
 WORKDIR /app
 
 COPY package*.json ./
-COPY tsconfig.build.json ./
 COPY tsconfig.json ./
 
-RUN npm ci
+RUN npm i
 COPY . ./
+
 RUN npm run build
 
 
 
-# Build stage (for production)
-FROM node:20-alpine AS build
+FROM node:22-alpine AS development
+ENV NODE_ENV=development
 WORKDIR /app
+
+COPY --from=base /app /app
+
+CMD ["npm", "run", "start:debug"]
+
+
+
+FROM node:22-alpine3.21 AS production
+ENV NODE_ENV=production
+
+WORKDIR /app
+
 COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
+RUN npm ci --only=production && npm cache clean --force
 
-
-# Production stage
-FROM node:20-alpine3.19 AS production
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
-
-WORKDIR /app
-
-COPY --from=development /app/package*.json ./
-COPY --from=development /app/node_modules ./node_modules
-COPY --from=development /app/dist ./dist
+COPY --from=base /app/dist ./dist
 
 
 CMD ["node", "dist/main"]
