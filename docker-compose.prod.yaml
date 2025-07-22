@@ -1,5 +1,6 @@
 services:
   api:
+    container_name: backend-prod
     env_file:
       - path: .env.production
     build:
@@ -20,6 +21,7 @@ services:
       - postgres
 
   postgres:
+    container_name: postgres-prod
     env_file:
       - path: .env.production
     image: postgres:17.5-alpine3.22
