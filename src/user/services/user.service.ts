@@ -105,18 +105,6 @@ export class UserService {
     }
   }
 
-  private async _save(user: IUser): Promise<IUser> {
-    try {
-      const savedUser = await this.userRepository.save(user);
-      return savedUser;
-    } catch (error) {
-      throw new HttpException(
-        'An error occured while saving user',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
   async updateTheme(userId: UUID, theme: string): Promise<HttpStatus> {
     const foundUser = await this.findOneById(userId);
     try {
@@ -149,6 +137,15 @@ export class UserService {
     }
   }
 
+  async getStravaAuthorizationUrl(): Promise<{ url: string }> {
+    const redirectUri = this.configService.get('STRAVA_REDIRECT_URI');
+    const clientId = this.configService.get('STRAVA_CLIENT_ID');
+
+    return {
+      url: `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}/dashboard&response_type=code&scope=read_all,activity:read_all,activity:write`,
+    };
+  }
+
   async updateLastLogin(userId: UUID): Promise<HttpStatus> {
     const foundUser = await this.findOneById(userId);
     try {
@@ -171,5 +168,17 @@ export class UserService {
       throw new NotFoundException(`User with id ${uuid} not found`);
     }
     return foundUser;
+  }
+
+  private async _save(user: IUser): Promise<IUser> {
+    try {
+      const savedUser = await this.userRepository.save(user);
+      return savedUser;
+    } catch (error) {
+      throw new HttpException(
+        'An error occured while saving user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

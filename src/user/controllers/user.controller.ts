@@ -1,12 +1,13 @@
-import { Body, Controller, HttpStatus, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Put } from '@nestjs/common';
 import { GetUser } from 'src/auth/decorators/user.decorator';
 import { Endpoint } from 'src/shared/endpoint.enum';
 import {
+  IUser,
   StravaLoginResponse,
   StravaRefreshTokenResponse,
-  IUser,
 } from '../interfaces/user.interfaces';
 import { UserService } from '../services/user.service';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @Controller(Endpoint.USERS)
 export class UserController {
@@ -33,5 +34,12 @@ export class UserController {
     @Body() body: { theme: string },
   ): Promise<HttpStatus> {
     return this.userService.updateTheme(user.uuid, body.theme);
+  }
+
+  @Get('strava-authorize')
+  @Public()
+  async getStravaAuthorizationUrl(): Promise<{ url: string }> {
+    const url = await this.userService.getStravaAuthorizationUrl();
+    return url;
   }
 }
