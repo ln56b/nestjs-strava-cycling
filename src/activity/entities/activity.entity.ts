@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { IActivity } from '../interfaces/activity.interfaces';
 
 @Entity()
@@ -6,6 +6,7 @@ export class Activity implements IActivity {
   @PrimaryGeneratedColumn('uuid')
   uuid?: string;
 
+  @Unique(['id'])
   @Column({ type: 'bigint' })
   id: string;
 
