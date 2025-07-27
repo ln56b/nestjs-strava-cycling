@@ -42,4 +42,9 @@ export class UserController {
     const url = await this.userService.getStravaAuthorizationUrl();
     return url;
   }
+
+  @Get('me')
+  getMe(@GetUser() user: IUser): Promise<IUser> {
+    return this.userService.findOneById(user.uuid);
+  }
 }
