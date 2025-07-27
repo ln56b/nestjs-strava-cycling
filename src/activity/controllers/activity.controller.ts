@@ -17,6 +17,10 @@ export class ActivityController {
   async getActivities(@GetUser() user: IUser): Promise<Activity[]> {
     const userInDB = await this.userService.findOneById(user.uuid);
 
+    if (!userInDB.athleteId) {
+      await this.userService.updateAthlete(user.uuid);
+    }
+
     const activities = await this.activityService.getActivities(userInDB);
 
     this.userService.updateLastLogin(user.uuid);
