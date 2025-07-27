@@ -161,6 +161,28 @@ export class UserService {
     }
   }
 
+  async updateAthlete(userId: string): Promise<HttpStatus> {
+    const foundUser = await this.findOneById(userId);
+    try {
+      const athlete = await firstValueFrom(
+        this.httpService.get(`https://www.strava.com/api/v3/athlete`, {
+          headers: { Authorization: `Bearer ${foundUser.strava_access_token}` },
+        }),
+      );
+      await this._save({
+        ...foundUser,
+        athleteId: athlete.data.id,
+        username: athlete.data.username,
+      });
+      return HttpStatus.OK;
+    } catch (error) {
+      throw new HttpException(
+        'An error occured while updating athlete id',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async findOneById(uuid: string): Promise<IUser> {
     const foundUser = await this.userRepository.findOneBy({ uuid });
     if (!foundUser) {

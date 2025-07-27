@@ -6,6 +6,9 @@ export class User implements IUser {
   @PrimaryGeneratedColumn('uuid')
   uuid?: string;
 
+  @Column({ nullable: true })
+  username?: string;
+
   @Column({ unique: true })
   email: string;
 

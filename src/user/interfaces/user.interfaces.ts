@@ -1,5 +1,6 @@
 export interface IUser {
   uuid?: string;
+  username?: string;
   email: string;
   password: string;
   theme: string;
