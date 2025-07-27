@@ -5,4 +5,5 @@ export enum Endpoint {
   LOGOUT = 'logout',
   ACTIVITIES = 'activities',
   USERS = 'users',
+  GEAR = 'gear',
 }

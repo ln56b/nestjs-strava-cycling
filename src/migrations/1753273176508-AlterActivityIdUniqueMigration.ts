@@ -3,7 +3,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class AlterActivityIdUniqueMigration1753273176508
   implements MigrationInterface
 {
-  name = 'lterActivityIdUniqueMigration1753273176508';
+  name = 'AlterActivityIdUniqueMigration1753273176508';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(

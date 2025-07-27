@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { IUser } from '../interfaces/user.interfaces';
+import { Gear } from 'src/gear/entities/gear.entity';
 
 @Entity()
 export class User implements IUser {
@@ -29,4 +30,7 @@ export class User implements IUser {
 
   @Column({ nullable: true })
   athleteId?: number;
+
+  @OneToMany(() => Gear, (gear) => gear.user)
+  gear: Gear[];
 }
