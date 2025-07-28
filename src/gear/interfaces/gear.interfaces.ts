@@ -15,4 +15,6 @@ export interface IGear
   brand?: string;
   model?: string;
   athleteId: string;
+  stopNotifications: boolean;
+  notifyThreshold?: number;
 }

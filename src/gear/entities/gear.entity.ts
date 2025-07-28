@@ -31,6 +31,12 @@ export class Gear implements IGear {
   @Column({ nullable: true })
   model?: string;
 
+  @Column({ default: false })
+  stopNotifications: boolean;
+
+  @Column({ nullable: true })
+  notifyThreshold?: number;
+
   @Column()
   athleteId: string;
 

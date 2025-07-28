@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,6 +13,7 @@ import { UserService } from 'src/user/services/user.service';
 import { Repository } from 'typeorm';
 import { Gear } from '../entities/gear.entity';
 import { IStravaGear } from '../interfaces/gear.interfaces';
+import { UpdateGearDto } from '../dtos/gear.dto';
 
 @Injectable()
 export class GearService {
@@ -123,6 +125,32 @@ export class GearService {
     }
 
     return savedGears;
+  }
+
+  async updateGear(
+    gearId: string,
+    updateGearDto: UpdateGearDto,
+  ): Promise<Gear> {
+    const gear = await this.gearRepository.findOne({ where: { id: gearId } });
+    if (!gear) {
+      throw new NotFoundException();
+    }
+
+    if (updateGearDto.notifyThreshold) {
+      gear.notifyThreshold = updateGearDto.notifyThreshold;
+    }
+
+    if (updateGearDto.stopNotifications) {
+      gear.stopNotifications = updateGearDto.stopNotifications;
+    }
+
+    try {
+      await this.gearRepository.save(gear);
+    } catch (error: any) {
+      throw new InternalServerErrorException(error.message);
+    }
+
+    return gear;
   }
 
   private mapStravaGearToEntity(
