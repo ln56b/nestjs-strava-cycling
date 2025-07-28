@@ -72,6 +72,7 @@ export interface StravaAthlete {
   measurement_preference: string;
   ftp: number;
   weight: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   clubs: any[];
   bikes: SummaryGear[];
   shoes: SummaryGear[];

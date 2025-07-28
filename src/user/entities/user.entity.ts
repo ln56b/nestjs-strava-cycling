@@ -1,6 +1,5 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { IUser } from '../interfaces/user.interfaces';
-import { Gear } from 'src/gear/entities/gear.entity';
 
 @Entity()
 export class User implements IUser {

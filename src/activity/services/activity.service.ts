@@ -64,6 +64,7 @@ export class ActivityService {
         });
 
         savedActivities.push(...insertedActivities);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         throw new InternalServerErrorException(error.message);
       }
@@ -106,6 +107,7 @@ export class ActivityService {
 
         page++;
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       switch (error.response?.status) {
         case 401:

@@ -77,6 +77,7 @@ export class GearService {
 
       const gear = await firstValueFrom(response);
       return gear.data;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       switch (error.response?.status) {
         case 401:
@@ -119,6 +120,7 @@ export class GearService {
         });
 
         savedGears.push(...insertedGear);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         throw new InternalServerErrorException(error.message);
       }
@@ -146,6 +148,7 @@ export class GearService {
 
     try {
       await this.gearRepository.save(gear);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       throw new InternalServerErrorException(error.message);
     }
