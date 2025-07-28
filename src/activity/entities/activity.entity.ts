@@ -1,5 +1,13 @@
-import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 import { IActivity } from '../interfaces/activity.interfaces';
+import { User } from 'src/user/entities/user.entity';
 
 @Entity()
 export class Activity implements IActivity {
@@ -9,9 +17,6 @@ export class Activity implements IActivity {
   @Unique(['id'])
   @Column({ type: 'bigint' })
   id: string;
-
-  @Column()
-  athleteId: number;
 
   @Column()
   name: string;
@@ -102,4 +107,11 @@ export class Activity implements IActivity {
 
   @Column({ nullable: true })
   workout_type: number | null;
+
+  @Column()
+  athleteId: string;
+
+  @ManyToOne(() => User, (user) => user.athleteId, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'athleteId', referencedColumnName: 'athleteId' })
+  user: User;
 }

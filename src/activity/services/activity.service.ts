@@ -20,20 +20,25 @@ export class ActivityService {
     private readonly activityRepository: Repository<Activity>,
   ) {}
 
-  async getActivities(user: IUser): Promise<Activity[]> {
+  async getAthleteActivities(user: IUser): Promise<Activity[]> {
     const activities = await this.fetchStravaActivities(user);
-    await this.saveActivities(activities);
+    await this.saveAthleteActivities(activities, user.athleteId);
 
     const activitiesInDB = await this.activityRepository.find({
       where: {
-        athleteId: user.athleteId,
+        user: {
+          athleteId: user.athleteId,
+        },
       },
     });
 
     return activitiesInDB;
   }
 
-  async saveActivities(activities: IStravaActivity[]): Promise<Activity[]> {
+  async saveAthleteActivities(
+    activities: IStravaActivity[],
+    userAthleteId: string,
+  ): Promise<Activity[]> {
     const batchSize = 10;
     const batches = [];
     for (let i = 0; i < activities.length; i += batchSize) {
@@ -44,7 +49,9 @@ export class ActivityService {
 
     for (const batch of batches) {
       try {
-        const activityEntities = batch.map(this.mapStravaActivityToEntity);
+        const activityEntities = batch.map((activity) =>
+          this.mapStravaActivityToEntity(activity, userAthleteId),
+        );
         await this.activityRepository
           .createQueryBuilder()
           .insert()
@@ -113,11 +120,14 @@ export class ActivityService {
     return allActivities;
   };
 
-  private mapStravaActivityToEntity(stravaActivity: IStravaActivity): Activity {
+  private mapStravaActivityToEntity(
+    stravaActivity: IStravaActivity,
+    userAthleteId: string,
+  ): Activity {
     const activity = new Activity();
     activity.id = stravaActivity.id;
-    activity.athleteId = stravaActivity.athlete.id;
     activity.name = stravaActivity.name;
+    activity.athleteId = userAthleteId;
     activity.achievement_count = stravaActivity.achievement_count;
     activity.athlete_count = stravaActivity.athlete_count;
     activity.average_speed = stravaActivity.average_speed;

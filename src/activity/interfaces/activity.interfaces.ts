@@ -5,7 +5,7 @@ interface IActivityMap {
 }
 
 interface IAthlete {
-  id: number;
+  id: string;
   resource_state: number;
 }
 
@@ -87,5 +87,5 @@ export interface IActivity
     | 'upload_id_str'
     | 'workout_type'
   > {
-  athleteId: number;
+  athleteId: string;
 }
