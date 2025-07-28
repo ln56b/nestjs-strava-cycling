@@ -26,8 +26,9 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private configService: ConfigService,
-    private logger: Logger,
   ) {}
+
+  private readonly logger = new Logger(UserService.name);
 
   async loginToStrava(
     userId: string,
