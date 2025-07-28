@@ -28,9 +28,6 @@ export class User implements IUser {
   @Column({ nullable: true })
   last_login?: Date;
 
-  @Column({ nullable: true })
-  athleteId?: number;
-
-  @OneToMany(() => Gear, (gear) => gear.user)
-  gear: Gear[];
+  @Column({ unique: true, nullable: true })
+  athleteId?: string;
 }

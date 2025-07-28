@@ -11,6 +11,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import {
   IUser,
+  StravaAthlete,
   StravaLoginResponse,
   StravaRefreshTokenResponse,
 } from '../interfaces/user.interfaces';
@@ -141,7 +142,7 @@ export class UserService {
     const clientId = this.configService.get('STRAVA_CLIENT_ID');
 
     return {
-      url: `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}/dashboard&response_type=code&scope=read_all,activity:read_all,activity:write`,
+      url: `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}/dashboard&response_type=code&scope=read_all,profile:read_all,activity:read_all`,
     };
   }
 
@@ -161,18 +162,31 @@ export class UserService {
     }
   }
 
-  async updateAthlete(userId: string): Promise<HttpStatus> {
-    const foundUser = await this.findOneById(userId);
+  async getStravaAthlete(user: IUser): Promise<StravaAthlete> {
     try {
-      const athlete = await firstValueFrom(
+      const apiRes = await firstValueFrom(
         this.httpService.get(`https://www.strava.com/api/v3/athlete`, {
-          headers: { Authorization: `Bearer ${foundUser.strava_access_token}` },
+          headers: { Authorization: `Bearer ${user.strava_access_token}` },
         }),
       );
+      return apiRes.data;
+    } catch (error) {
+      throw new HttpException(
+        'An error occured while getting Strava athlete',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateAthlete(user: IUser): Promise<HttpStatus> {
+    const foundUser = await this.findOneById(user.uuid);
+    try {
+      const athlete = await this.getStravaAthlete(foundUser);
+
       await this._save({
         ...foundUser,
-        athleteId: athlete.data.id,
-        username: athlete.data.username,
+        athleteId: athlete.id,
+        username: athlete.username,
       });
       return HttpStatus.OK;
     } catch (error) {
