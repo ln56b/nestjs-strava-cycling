@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,6 +12,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import {
   IUser,
+  StravaAthlete,
   StravaLoginResponse,
   StravaRefreshTokenResponse,
 } from '../interfaces/user.interfaces';
@@ -24,6 +26,7 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private configService: ConfigService,
+    private logger: Logger,
   ) {}
 
   async loginToStrava(
@@ -55,6 +58,7 @@ export class UserService {
       );
       return stravaLoginResponse.data;
     } catch (error) {
+      this.logger.error('Error logging in to Strava:', error);
       throw new HttpException(
         'An error occured while logging in to Strava',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -75,6 +79,7 @@ export class UserService {
       const createdUser = await this.userRepository.save(user);
       return createdUser;
     } catch (error) {
+      this.logger.error('Error creating user:', error);
       throw new HttpException(
         'An error occured while creating user',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -97,6 +102,7 @@ export class UserService {
       );
       return stravaRefreshTokenResponse.data;
     } catch (error) {
+      this.logger.error('Error refreshing Strava token:', error);
       throw new HttpException(
         'An error occured while refreshing Strava token',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -113,6 +119,7 @@ export class UserService {
       });
       return HttpStatus.OK;
     } catch (error) {
+      this.logger.error('Error updating theme:', error);
       throw new HttpException(
         'An error occured while updating theme',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -129,6 +136,7 @@ export class UserService {
       await this._save({ ...foundUser, strava_access_token: accessToken });
       return HttpStatus.OK;
     } catch (error) {
+      this.logger.error('Error updating access token:', error);
       throw new HttpException(
         'An error occured while updating access token',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -141,7 +149,7 @@ export class UserService {
     const clientId = this.configService.get('STRAVA_CLIENT_ID');
 
     return {
-      url: `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}/dashboard&response_type=code&scope=read_all,activity:read_all,activity:write`,
+      url: `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}/dashboard&response_type=code&scope=read_all,profile:read_all,activity:read_all`,
     };
   }
 
@@ -154,6 +162,7 @@ export class UserService {
       });
       return HttpStatus.OK;
     } catch (error) {
+      this.logger.error('Error updating last login:', error);
       throw new HttpException(
         'An error occured while updating last login',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -161,21 +170,36 @@ export class UserService {
     }
   }
 
-  async updateAthlete(userId: string): Promise<HttpStatus> {
-    const foundUser = await this.findOneById(userId);
+  async getStravaAthlete(user: IUser): Promise<StravaAthlete> {
     try {
-      const athlete = await firstValueFrom(
+      const apiRes = await firstValueFrom(
         this.httpService.get(`https://www.strava.com/api/v3/athlete`, {
-          headers: { Authorization: `Bearer ${foundUser.strava_access_token}` },
+          headers: { Authorization: `Bearer ${user.strava_access_token}` },
         }),
       );
+      return apiRes.data;
+    } catch (error) {
+      this.logger.error('Error getting Strava athlete:', error);
+      throw new HttpException(
+        'An error occured while getting Strava athlete',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateAthlete(user: IUser): Promise<HttpStatus> {
+    const foundUser = await this.findOneById(user.uuid);
+    try {
+      const athlete = await this.getStravaAthlete(foundUser);
+
       await this._save({
         ...foundUser,
-        athleteId: athlete.data.id,
-        username: athlete.data.username,
+        athleteId: athlete.id,
+        username: athlete.username,
       });
       return HttpStatus.OK;
     } catch (error) {
+      this.logger.error('Error updating athlete id:', error);
       throw new HttpException(
         'An error occured while updating athlete id',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -196,6 +220,7 @@ export class UserService {
       const savedUser = await this.userRepository.save(user);
       return savedUser;
     } catch (error) {
+      this.logger.error('Error saving user:', error);
       throw new HttpException(
         'An error occured while saving user',
         HttpStatus.INTERNAL_SERVER_ERROR,
