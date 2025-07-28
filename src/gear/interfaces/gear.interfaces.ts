@@ -11,14 +11,8 @@ export interface IStravaGear {
 }
 
 export interface IGear
-  extends Omit<
-    IStravaGear,
-    | 'resource_state'
-    | 'brand_name'
-    | 'model_name'
-    | 'frame_type'
-    | 'description'
-  > {
+  extends Pick<IStravaGear, 'id' | 'primary' | 'name' | 'distance'> {
   brand?: string;
   model?: string;
+  athleteId: string;
 }

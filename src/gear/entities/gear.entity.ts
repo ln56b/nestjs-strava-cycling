@@ -1,4 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { IGear } from '../interfaces/gear.interfaces';
 import { User } from 'src/user/entities/user.entity';
 
@@ -25,6 +31,10 @@ export class Gear implements IGear {
   @Column({ nullable: true })
   model?: string;
 
-  @ManyToOne(() => User, (user) => user.gear, { onDelete: 'CASCADE' })
+  @Column()
+  athleteId: string;
+
+  @ManyToOne(() => User, (user) => user.athleteId, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'athleteId', referencedColumnName: 'athleteId' })
   user: User;
 }
