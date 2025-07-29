@@ -7,5 +7,5 @@ export class UpdateGearDto {
 
   @IsBoolean()
   @IsOptional()
-  stopNotifications?: boolean;
+  showNotifications?: boolean;
 }

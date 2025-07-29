@@ -1,3 +1,4 @@
+import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   Entity,
@@ -6,7 +7,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { IGear } from '../interfaces/gear.interfaces';
-import { User } from 'src/user/entities/user.entity';
 
 @Entity()
 export class Gear implements IGear {
@@ -32,10 +32,13 @@ export class Gear implements IGear {
   model?: string;
 
   @Column({ default: false })
-  stopNotifications: boolean;
+  showNotifications: boolean;
 
   @Column({ nullable: true })
   notifyThreshold?: number;
+
+  @Column()
+  type: string;
 
   @Column()
   athleteId: string;
