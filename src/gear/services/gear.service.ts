@@ -26,13 +26,10 @@ export class GearService {
 
   async getAthleteGears(user: IUser): Promise<Gear[]> {
     const athlete = await this.userService.getStravaAthlete(user);
-    const gearIds: string[] = [];
-    athlete.bikes?.forEach((bike) => {
-      gearIds.push(bike.id);
-    });
-    athlete.shoes?.forEach((shoe) => {
-      gearIds.push(shoe.id);
-    });
+    const gearIds = [
+      ...(athlete.bikes?.map((bike) => bike.id) ?? []),
+      ...(athlete.shoes?.map((shoe) => shoe.id) ?? []),
+    ];
 
     if (gearIds.length === 0) {
       return [];
@@ -40,7 +37,14 @@ export class GearService {
 
     const gears = await this.fetchStravaGears(gearIds, user);
 
-    await this.saveAthleteGears(gears, athlete.id);
+    const gearsWithType = gears.map((gear) => ({
+      ...gear,
+      type: athlete.bikes?.find((bike) => bike.id === gear.id)
+        ? 'bike'
+        : 'shoe',
+    }));
+
+    await this.saveAthleteGears(gearsWithType, athlete.id);
 
     const gearsInDB = await this.gearRepository.find({
       where: {
@@ -61,6 +65,7 @@ export class GearService {
       const gear = await this.fetchStravaGearById(gearId, user);
       gears.push(gear);
     }
+
     return gears;
   }
 
@@ -91,11 +96,12 @@ export class GearService {
   }
 
   async saveAthleteGears(
-    gears: IStravaGear[],
+    gears: (IStravaGear & { type: string })[],
     userAthleteId: string,
   ): Promise<Gear[]> {
     const batchSize = 10;
     const batches = [];
+
     for (let i = 0; i < gears.length; i += batchSize) {
       batches.push(gears.slice(i, i + batchSize));
     }
@@ -104,8 +110,8 @@ export class GearService {
 
     for (const batch of batches) {
       try {
-        const gearEntities = batch.map((gear) =>
-          this.mapStravaGearToEntity(gear, userAthleteId),
+        const gearEntities = batch.map((gearWithType) =>
+          this.mapStravaGearToEntity(gearWithType, userAthleteId),
         );
 
         await this.gearRepository
@@ -142,8 +148,8 @@ export class GearService {
       gear.notifyThreshold = updateGearDto.notifyThreshold;
     }
 
-    if (updateGearDto.stopNotifications) {
-      gear.stopNotifications = updateGearDto.stopNotifications;
+    if (updateGearDto.showNotifications !== undefined) {
+      gear.showNotifications = updateGearDto.showNotifications;
     }
 
     try {
@@ -157,7 +163,7 @@ export class GearService {
   }
 
   private mapStravaGearToEntity(
-    gear: IStravaGear,
+    gear: IStravaGear & { type: string },
     userAthleteId: string,
   ): Gear {
     const gearEntity = new Gear();
@@ -167,6 +173,7 @@ export class GearService {
     gearEntity.distance = gear.distance;
     gearEntity.brand = gear.brand_name;
     gearEntity.model = gear.model_name;
+    gearEntity.type = gear.type;
     gearEntity.athleteId = userAthleteId;
     return gearEntity;
   }
