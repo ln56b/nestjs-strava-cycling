@@ -136,10 +136,12 @@ export class GearService {
   }
 
   async updateGear(
-    gearId: string,
+    gearUuid: string,
     updateGearDto: UpdateGearDto,
   ): Promise<Gear> {
-    const gear = await this.gearRepository.findOne({ where: { id: gearId } });
+    const gear = await this.gearRepository.findOne({
+      where: { uuid: gearUuid },
+    });
     if (!gear) {
       throw new NotFoundException();
     }
@@ -160,6 +162,17 @@ export class GearService {
     }
 
     return gear;
+  }
+
+  async deleteGear(gearUuid: string): Promise<void> {
+    const gear = await this.gearRepository.findOne({
+      where: { uuid: gearUuid },
+    });
+    if (!gear) {
+      throw new NotFoundException();
+    }
+
+    await this.gearRepository.delete(gearUuid);
   }
 
   private mapStravaGearToEntity(

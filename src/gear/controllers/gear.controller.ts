@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Put } from '@nestjs/common';
 import { GetUser } from 'src/auth/decorators/user.decorator';
 import { Endpoint } from 'src/shared/endpoint.enum';
 import { UserService } from 'src/user/services/user.service';
@@ -21,11 +21,16 @@ export class GearController {
     return this.gearService.getAthleteGears(userInDB);
   }
 
-  @Put(':gearId')
+  @Put(':gearUuid')
   async updateGear(
-    @Param('gearId') gearId: string,
+    @Param('gearUuid') gearUuid: string,
     @Body() updateGearDto: UpdateGearDto,
   ): Promise<Gear> {
-    return this.gearService.updateGear(gearId, updateGearDto);
+    return this.gearService.updateGear(gearUuid, updateGearDto);
+  }
+
+  @Delete(':gearUuid')
+  async deleteGear(@Param('gearUuid') gearUuid: string): Promise<void> {
+    return this.gearService.deleteGear(gearUuid);
   }
 }

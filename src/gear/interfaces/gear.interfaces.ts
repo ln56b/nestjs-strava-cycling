@@ -18,4 +18,5 @@ export interface IGear
   showNotifications: boolean;
   notifyThreshold?: number;
   type: string;
+  uuid?: string;
 }
