@@ -43,6 +43,14 @@ export class AuthService {
     if (existingUser) {
       throw new BadRequestException('User already exists');
     }
+
+    const isPasswordValid =
+      /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{12,}$/;
+
+    if (!user.password.match(isPasswordValid)) {
+      throw new BadRequestException('Password does not match validation rules');
+    }
+
     const hashedPassword = await this._hashPassword(user.password);
 
     const newUser = await this.userService.create({
